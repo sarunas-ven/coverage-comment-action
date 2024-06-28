@@ -61,6 +61,7 @@ class Config:
     GITHUB_API_URL: str
     GITHUB_REPOSITORY: str
     GITHUB_REF: str
+    GITHUB_TMP_BRANCH: str = 'tempmaster'
     BADGE_FILENAME: str = "coverage-comment-badge.json"
     COVERAGE_FILE: str = "coverage.xml"
     COMMENT_TEMPLATE: Optional[str] = None
@@ -272,8 +273,7 @@ def get_previous_coverage_rate(config: Config) -> Optional[float]:
 def get_previous_coverage_rate_from_xml(config: Config) -> Optional[float]:
     try:
         print('starting to retrieve previous coverage rate from xml')
-        temp_branch = config.DIFF_COVER_ARGS.split('=')[-1]
-        coverage_str = call('git', 'show', f'{temp_branch}:{config.BADGE_FILENAME}')
+        coverage_str = call('git', 'show', f'{config.GITHUB_TMP_BRANCH}:{config.BADGE_FILENAME}')
         def convert(tuple_values):
             result = []
             for key, value in tuple_values:

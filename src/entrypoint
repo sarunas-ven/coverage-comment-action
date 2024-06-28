@@ -256,6 +256,9 @@ def get_badge_json_url(config: Config) -> str:
 
 def get_previous_coverage_rate(config: Config) -> Optional[float]:
     try:
+        print(f"to get json string for  generating coverage using config:\n")
+        print(config)
+        print('End of config')
         response = requests.get(get_badge_json_url(config=config))
         return float(response.json()["message"][:-1]) / 100
     except Exception as e:

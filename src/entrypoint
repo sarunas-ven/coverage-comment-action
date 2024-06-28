@@ -273,7 +273,7 @@ def get_previous_coverage_rate(config: Config) -> Optional[float]:
 def get_previous_coverage_rate_from_xml(config: Config) -> Optional[float]:
     try:
         print('starting to retrieve previous coverage rate from xml')
-        coverage_str = call('git', 'show', f'{config.GITHUB_TMP_BRANCH}:{config.BADGE_FILENAME}')
+        coverage_str = call('git', 'show', f'{config.GITHUB_TMP_BRANCH}:{config.COVERAGE_FILE}')
         def convert(tuple_values):
             result = []
             for key, value in tuple_values:

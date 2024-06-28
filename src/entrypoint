@@ -29,7 +29,9 @@ def main():
     if config.GITHUB_PR_NUMBER:
         print(f"Commenting on the coverage on PR {config.GITHUB_PR_NUMBER}")
         diff_coverage_info = get_diff_coverage_info(config=config)
-        previous_coverage_rate = get_previous_coverage_rate(config=config)
+        print('trying to read previous coverage rate')
+        # previous_coverage_rate = get_previous_coverage_rate(config=config)
+        previous_coverage_rate = get_previous_coverage_rate_from_xml(config=config)
 
         comment = get_markdown_comment(
             coverage_info=coverage_info,
@@ -260,12 +262,47 @@ def get_previous_coverage_rate(config: Config) -> Optional[float]:
         print(config)
         print('End of config')
         response = requests.get(get_badge_json_url(config=config))
-        return float(response.json()["message"][:-1]) / 100
+        return float(response.json()["metrics"]['lines']['rate']) / 100
     except Exception as e:
         print(f"Error - get_previous_coverage_rate exception: {e}", e.with_traceback())
         print("Previous coverage results not found, cannot report on evolution.")
         return None
 
+
+def get_previous_coverage_rate_from_xml(config: Config) -> Optional[float]:
+    try:
+        print('starting to retrieve previous coverage rate from xml')
+        coverage_str = call('git', 'show', f'{config.GITHUB_BASE_REF}:{config.BADGE_FILENAME}')
+        def convert(tuple_values):
+            result = []
+            for key, value in tuple_values:
+                result.append(
+                    (
+                        key,
+                        {
+                            "@timestamp": int,
+                            "@lines-valid": int,
+                            "@lines-covered": int,
+                            "@line-rate": float,
+                            "@branches-valid": int,
+                            "@branches-covered": int,
+                            "@branch-rate": float,
+                            "@hits": int,
+                            "@branch": lambda x: x == "true",
+                        }.get(key, lambda x: x)(value),
+                    )
+                )
+            return dict(result)
+
+        return json.loads(
+            json.dumps(xmltodict.parse(coverage_str)),
+            object_pairs_hook=convert,
+        )["coverage"]
+    except Exception as e:
+        print(f"Error - get_previous_coverage_rate exception: {e}")
+        print(e.with_traceback())
+        print("Previous coverage results not found, cannot report on evolution.")
+        return None
 
 def upload_badge(badge: str, config: Config) -> None:
     try:

@@ -161,7 +161,7 @@ def get_diff_coverage_info(config: Config) -> dict:
         call(
             "diff-cover",
             config.COVERAGE_FILE,
-            f"--compare-branch=origin/{config.GITHUB_BASE_REF}",
+            f"--compare-branch={config.GITHUB_BASE_REF}",
             f"--json-report={f.name}",
             "--diff-range-notation=..",
             "--quiet",

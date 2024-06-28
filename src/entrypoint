@@ -163,7 +163,7 @@ def get_diff_coverage_info(config: Config) -> dict:
         call(
             "diff-cover",
             config.COVERAGE_FILE,
-            f"--compare-branch={config.GITHUB_BASE_REF}",
+            # f"--compare-branch={config.GITHUB_BASE_REF}",
             f"--json-report={f.name}",
             "--diff-range-notation=..",
             "--quiet",
@@ -272,7 +272,8 @@ def get_previous_coverage_rate(config: Config) -> Optional[float]:
 def get_previous_coverage_rate_from_xml(config: Config) -> Optional[float]:
     try:
         print('starting to retrieve previous coverage rate from xml')
-        coverage_str = call('git', 'show', f'{config.GITHUB_BASE_REF}:{config.BADGE_FILENAME}')
+        temp_branch = config.DIFF_COVER_ARGS.split('=')[-1]
+        coverage_str = call('git', 'show', f'{temp_branch}:{config.BADGE_FILENAME}')
         def convert(tuple_values):
             result = []
             for key, value in tuple_values:

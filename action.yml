@@ -49,8 +49,8 @@ inputs:
     required: false
 runs:
   using: docker
-  # image: Dockerfile
-  image: docker://ewjoachim/coverage-comment-action:latest
+  image: Dockerfile
+  # image: docker://ewjoachim/coverage-comment-action:latest
   env:
     GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
     COVERAGE_FILE: ${{ inputs.COVERAGE_FILE }}

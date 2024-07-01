@@ -14,6 +14,7 @@ import github
 import jinja2
 import requests
 import xmltodict
+import xml.etree.ElementTree as ET
 
 MARKER = """<!-- This comment was produced by coverage-comment-action -->"""
 SHIELD_URL = "https://img.shields.io/endpoint?url={url}"
@@ -30,7 +31,6 @@ def main():
         print(f"Commenting on the coverage on PR {config.GITHUB_PR_NUMBER}")
         diff_coverage_info = get_diff_coverage_info(config=config)
         print('trying to read previous coverage rate')
-        # previous_coverage_rate = get_previous_coverage_rate(config=config)
         previous_coverage_rate = get_previous_coverage_rate_from_xml(config=config)
 
         comment = get_markdown_comment(
@@ -164,7 +164,6 @@ def get_diff_coverage_info(config: Config) -> dict:
         call(
             "diff-cover",
             config.COVERAGE_FILE,
-            # f"--compare-branch={config.GITHUB_BASE_REF}",
             f"--json-report={f.name}",
             "--diff-range-notation=..",
             "--quiet",
@@ -259,50 +258,25 @@ def get_badge_json_url(config: Config) -> str:
 
 def get_previous_coverage_rate(config: Config) -> Optional[float]:
     try:
-        print(f"to get json string for  generating coverage using config:\n")
-        print(config)
-        print('End of config')
         response = requests.get(get_badge_json_url(config=config))
-        return float(response.json()["metrics"]['lines']['rate']) / 100
+        return float(response.json()["message"][:-1]) / 100
     except Exception as e:
         print(f"Error - get_previous_coverage_rate exception: {e}", e.with_traceback())
         print("Previous coverage results not found, cannot report on evolution.")
         return None
 
-
 def get_previous_coverage_rate_from_xml(config: Config) -> Optional[float]:
     try:
         print('starting to retrieve previous coverage rate from xml')
-        coverage_str = call('git', 'show', f'{config.GITHUB_TMP_BRANCH}:{config.COVERAGE_FILE}')
-        def convert(tuple_values):
-            result = []
-            for key, value in tuple_values:
-                result.append(
-                    (
-                        key,
-                        {
-                            "@timestamp": int,
-                            "@lines-valid": int,
-                            "@lines-covered": int,
-                            "@line-rate": float,
-                            "@branches-valid": int,
-                            "@branches-covered": int,
-                            "@branch-rate": float,
-                            "@hits": int,
-                            "@branch": lambda x: x == "true",
-                        }.get(key, lambda x: x)(value),
-                    )
-                )
-            return dict(result)
-
-        return json.loads(
-            json.dumps(xmltodict.parse(coverage_str)),
-            object_pairs_hook=convert,
-        )["coverage"]
+        xml_string = subprocess.check_output(f"git show {config.GITHUB_TMP_BRANCH}:{config.COVERAGE_FILE}", shell=True)
+        tree = ET.ElementTree(ET.fromstring(xml_string.decode("UTF-8")))
+        root = tree.getroot()
+        line_rate = root.get('line-rate')
+        line_rate = float(line_rate)
+        return round(line_rate, 2)
     except Exception as e:
-        print(f"Error - get_previous_coverage_rate exception: {e}")
+        print(f"Error - get_previous_coverage_rate_from_xml exception: {e}")
         print(e.with_traceback())
-        print("Previous coverage results not found, cannot report on evolution.")
         return None
 
 def upload_badge(badge: str, config: Config) -> None:

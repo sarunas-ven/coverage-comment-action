@@ -30,7 +30,7 @@ def main():
     if config.GITHUB_PR_NUMBER:
         print(f"Commenting on the coverage on PR {config.GITHUB_PR_NUMBER}")
         diff_coverage_info = get_diff_coverage_info(config=config)
-        print('trying to read previous coverage rate')
+        print("trying to read previous coverage rate")
         previous_coverage_rate = get_previous_coverage_rate_from_xml(config=config)
 
         comment = get_markdown_comment(
@@ -61,7 +61,7 @@ class Config:
     GITHUB_API_URL: str
     GITHUB_REPOSITORY: str
     GITHUB_REF: str
-    GITHUB_TMP_BRANCH: str = 'tempmaster'
+    GITHUB_TMP_BRANCH: str = "tempmaster"
     BADGE_FILENAME: str = "coverage-comment-badge.json"
     COVERAGE_FILE: str = "coverage.xml"
     COMMENT_TEMPLATE: Optional[str] = None
@@ -265,19 +265,24 @@ def get_previous_coverage_rate(config: Config) -> Optional[float]:
         print("Previous coverage results not found, cannot report on evolution.")
         return None
 
+
 def get_previous_coverage_rate_from_xml(config: Config) -> Optional[float]:
     try:
-        print('starting to retrieve previous coverage rate from xml')
-        xml_string = subprocess.check_output(f"git show {config.GITHUB_TMP_BRANCH}:{config.COVERAGE_FILE}", shell=True)
-        tree = ET.ElementTree(ET.fromstring(xml_string.decode("UTF-8")))
-        root = tree.getroot()
-        line_rate = root.get('line-rate')
-        line_rate = float(line_rate)
-        return round(line_rate, 2)
+        print("starting to retrieve previous coverage rate from xml")
+        xml_string = subprocess.check_output(
+            f"git show {config.GITHUB_TMP_BRANCH}:{config.COVERAGE_FILE}", shell=True
+        )
+        line_rate = (
+            ET.ElementTree(ET.fromstring(xml_string.decode("UTF-8")))
+            .getroot()
+            .get("line-rate")
+        )
+        return float(line_rate)
     except Exception as e:
         print(f"Error - get_previous_coverage_rate_from_xml exception: {e}")
         print(e.with_traceback())
         return None
+
 
 def upload_badge(badge: str, config: Config) -> None:
     try:

@@ -160,6 +160,8 @@ def get_coverage_info(config: Config) -> dict:
 
 def get_diff_coverage_info(config: Config) -> dict:
     call("git", "fetch", "--depth=1000")
+    print("printing diff-cover results:\n--------------------------\n")
+    os.system('diff-cover cobertura.xml --compare-branch tempmaster')
     with tempfile.NamedTemporaryFile("r") as f:
         call(
             "diff-cover",

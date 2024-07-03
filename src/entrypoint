@@ -32,6 +32,7 @@ def main():
         diff_coverage_info = get_diff_coverage_info(config=config)
         print("trying to read previous coverage rate")
         previous_coverage_rate = get_previous_coverage_rate_from_xml(config=config)
+        print(f"previous coverage rate: {previous_coverage_rate}")
 
         comment = get_markdown_comment(
             coverage_info=coverage_info,
@@ -39,6 +40,7 @@ def main():
             previous_coverage_rate=previous_coverage_rate,
             config=config,
         )
+        print(f"Comment to post: {comment}")
         post_comment(body=comment, gh=gh, config=config)
 
     if config.BADGE_ENABLED and is_main_branch(gh=gh, config=config):

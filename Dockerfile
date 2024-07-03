@@ -17,6 +17,7 @@ COPY src/entrypoint /usr/local/bin/
 COPY src/add-to-wiki /usr/local/bin/
 COPY src/default.md.j2 /var/
 
-WORKDIR /home/runner/work/net-back/net-back
+# /home/runner/work/net-back/net-back
+WORKDIR /github/workspace
 
 CMD [ "entrypoint" ]

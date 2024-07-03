@@ -164,6 +164,10 @@ def get_diff_coverage_info(config: Config) -> dict:
     call("git", "fetch", "--depth=1000")
     print("printing diff-cover results:\n--------------------------\n")
     os.system('diff-cover cobertura.xml --compare-branch tempmaster')
+    xml = ET.parse(config.COVERAGE_FILE)
+    root = xml.getroot()
+    xml_source_path = root.find('./sources/source').text
+    print(f"current branch coberture.xml source path: {xml_source_path}")
     with tempfile.NamedTemporaryFile("r") as f:
         call(
             "diff-cover",
@@ -276,11 +280,11 @@ def get_previous_coverage_rate_from_xml(config: Config) -> Optional[float]:
         xml_string = subprocess.check_output(
             f"git show {config.GITHUB_TMP_BRANCH}:{config.COVERAGE_FILE}", shell=True
         )
-        line_rate = (
-            ET.ElementTree(ET.fromstring(xml_string.decode("UTF-8")))
-            .getroot()
-            .get("line-rate")
-        )
+        # print cobertura.xml path
+        xml_root = ET.ElementTree(ET.fromstring(xml_string.decode("UTF-8"))).getroot()
+        xml_source_path = xml_root.find('./sources/source').text
+        print(f"previous branch coberture.xml source path: {xml_source_path}")
+        line_rate = xml_root.get("line-rate")
         return float(line_rate)
     except Exception as e:
         print(f"Error - get_previous_coverage_rate_from_xml exception: {e}")

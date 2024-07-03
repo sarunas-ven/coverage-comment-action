@@ -23,6 +23,10 @@ JSON_URL = "https://raw.githubusercontent.com/wiki/{repo_name}/{filename}"
 
 def main():
     print("Starting action")
+    print("working dirrectory:")
+    os.system('pwd')
+    print("listing files:")
+    os.system('ls -la')
     config = Config.from_environ(os.environ)
     coverage_info = get_coverage_info(config=config)
     gh = get_api(config=config)

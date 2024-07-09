@@ -16,7 +16,7 @@ RUN pip install -r requirements.txt
 COPY src/entrypoint /usr/local/bin/
 COPY src/add-to-wiki /usr/local/bin/
 COPY src/default.md.j2 /var/
-RUN ln -s /github/workspace /home/runner/work/net-back/net-back 
+COPY /home/runner/work/net-back/net-back /home/runner/work/net-back/net-back 
 
 WORKDIR /home/runner/work/net-back/net-back
 # WORKDIR /github/workspace

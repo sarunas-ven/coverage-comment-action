@@ -192,14 +192,14 @@ def get_markdown_comment(
 ):
     env = jinja2.Environment()
     template = config.COMMENT_TEMPLATE or pathlib.Path("/var/default.md.j2").read_text()
-    previous_coverage = previous_coverage_rate * 100 if previous_coverage_rate else None
-    coverage = coverage_info["@line-rate"] * 100
+    previous_coverage = round(previous_coverage_rate * 100, 3) if previous_coverage_rate else None
+    coverage = round(coverage_info["@line-rate"] * 100, 3)
     branch_coverage = (
         coverage_info["@branch-rate"] * 100
         if coverage_info.get("@branch-rate")
         else None
     )
-    diff_coverage = round(diff_coverage_info["total_percent_covered"], 3)
+    diff_coverage = diff_coverage_info["total_percent_covered"]
     file_info = {
         file: {"diff_coverage": stats["percent_covered"]}
         for file, stats in diff_coverage_info["src_stats"].items()
